@@ -1,0 +1,433 @@
+---
+title: "Assignment 1"
+author: "Wen Yuan Yen"
+date: "10/7/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+# Section 4.1.1
+
+## Exercises 2
+
+### (a)
+```{r}
+fibonacci <- numeric(30)
+fibonacci[1] <- fibonacci[2] <- 1
+for (i in 3:30) fibonacci[i] <- fibonacci[i - 2] + fibonacci[i - 1]
+ratio <- numeric(30)
+for (i in 2:30) ratio[i] <- fibonacci[i ] / fibonacci[i - 1]
+print(ratio)
+```
+
+### (b)
+```{r}
+gold_r <- (1+sqrt(5)) / 2
+paste("Golden ratio is",gold_r, sep = ' ')
+```
+
+The sequence of ratio converges to Golden ratio. Suppose the sequence converges to some real number, then
+$$ \frac{F_n}{F_{n-1}} = \frac{F_{n-1}}{F_{n-2}}~~ \fbox{for large n }$$ 
+
+Substitute $F_{n-2} = F_n -F_{n-1}$, then
+$$ \frac{F_n}{F_{n-1}} = \frac{F_{n-1}}{F_n -F_{n-1}} = \frac{\frac{F_n}{F_{n-1}}}{1}=\frac{1}{\underbrace{\frac{F_n}{F_{n-1}}}_{\varphi}-1}$$ 
+Hence, ratio of neighboring Fibonacci numbers, which are $>0$, converges to the positive root of
+$$\varphi^2 - \varphi-1=0$$
+$$where,~ \varphi= \frac{1+\sqrt{5}}{2} $$
+
+## Exercises 3
+
+### (a)
+The answer is a number 
+$$ 15 = 1 + 2 + 3 + 4+5 $$
+```{r}
+answer <- 0
+for(j in 1:5) answer <- answer + j
+print(answer)
+```
+
+### (b)
+The answer is a vector 
+$$ (1 , 2 , 3 , 4,5) $$
+```{r}
+answer <- NULL
+for(j in 1:5) answer <- c(answer , j)
+print(answer)
+```
+
+### (c)
+The answer is a vector 
+$$ (0,1 , 2 , 3 , 4,5) $$
+```{r}
+answer <- 0
+for(j in 1:5) answer <- c(answer , j)
+print(answer)
+```
+
+### (d)
+The answer is a number
+$$ 120 = 1 \times 2 \times 3 \times 4 \times 5 $$
+```{r}
+answer <- 1
+for(j in 1:5) answer <- answer * j
+print(answer)
+```
+
+### (e)
+The answer is a vector 
+$$ \Big[3 , (7 \times 3\mod 31)=21,(7 \times 21) \mod 31=23,(7 \times 23) \mod 31=6,(7 \times 6) \mod 31=11,... \Big] $$. That is 7 times the previous component modulus 31, except the seed = 3.
+```{r}
+answer <- 3
+for(j in 1:15) answer <- c(answer, (7 * answer[j] ) %% 31 )
+print(answer)
+```
+
+# Section 4.1.2
+
+## Exercises 4: GIC
+```{r}
+gic <- function(P, n){ # P is initial investment, n is interest period
+  if(n <= 3){
+    I = P * ( 1.04^n - 1)
+  } else {
+    I = P * ( 1.05^n - 1)
+  }
+  return(I) 
+}
+
+# Test the funtion
+n = 2.75
+paste("Initial investment of $100 earns interest of", round(gic(100,n),4),"when the term is",n ,"years.", sep = " ")
+
+n = 3.25
+paste("Initial investment of $100 earns interest of", round(gic(100,n),4),"when the term is",n ,"years.", sep = " ")
+```
+
+## Exercises 5: Morgage interest rate
+```{r}
+morgage_r <- function(P, n, open){
+  if(open == TRUE){
+    R <- P * 0.005 / (1 - 1.005^-n )
+  } else {
+    R <- P * 0.004 / (1 - 1.004^-n )
+  }
+  return(R)
+}
+
+# Test the funtion
+open <- TRUE
+paste("Principal of $100 requires monthly morgage payment of", round(morgage_r(100,24,open),4),"when the morgage term is open and 24 months.", sep = " ")
+
+open <- FALSE
+paste("Principal of $100 requires monthly morgage payment of", round(morgage_r(100,24,open),4),"when the morgage term is closed and 24 months.", sep = " ")
+
+```
+
+# Section 4.1.3
+
+## Exercises 2
+```{r}
+Fibonacci <- c(1,1)
+while(sum( tail(Fibonacci, n = 2) ) < 300){ # If Fibonacci number to be computed < 300, then break.
+  Fibonacci <- c(Fibonacci, sum( tail(Fibonacci, n = 2) ) ) # Otherwise, append it to the current vector
+}
+
+print(Fibonacci)
+```
+
+## Exercises 4
+
+### Initial value is 0.006
+```{r}
+i <- 0.006
+while(TRUE){
+  i.new <- (1 - (1 + i)^-20 ) / 19
+  if( abs(i.new - i) < 0.000001){ # stopping criterion: |i - i_old | < 10^-6
+    break}
+  i <- i.new
+}
+
+paste("The solution is",i.new,".",sep=" ")
+```
+
+### Other choices of initial values
+
+According to the table reported below, the closer to the solution the initial value is, the fewer iterations are required for convergence.
+```{r}
+initial <- seq(0.001, 0.01, by = 0.001)
+iterations <- numeric(10)
+solutions <- numeric(10)
+
+for(j in seq_along(initial)){
+  i <- initial[j]
+  iteration <- 1
+  while(TRUE){
+    i.new <- (1 - (1 + i)^-20 ) / 19
+    iteration <- iteration + 1
+    if( abs(i.new - i) < 0.000001){ # stopping criterion: |i - i_old | < 10^-6
+      break}
+    i <- i.new
+  }
+  iterations[j] <- iteration
+  solutions[j] <- i.new
+  
+}
+
+D <- data.frame(initial, solutions, iterations)
+D
+```
+
+
+
+## Exercises 5
+```{r}
+i <- 0.006
+iteration <- 1  # first iteration is calculated from i = 0.006
+while(TRUE){
+  i.new <- (1 - (1 + i)^-20 ) / 19
+  iteration <- iteration + 1 # Add this line for recording number of iteration
+  if( abs(i.new - i) < 0.000001){ 
+    break}
+  i <- i.new
+}
+
+paste("The solution is",i.new,"after",iteration,"iterations.",sep=" ")
+```
+
+# Section 4.1.5, exercise 2
+
+### (a)
+
+The approach works because the first term of the sieve in each step cannot be divided by any integer that is less than that term, except for 1. By definition, that is a prime number. If otherwise it can be divided by some integers that are less than it, then it should have been deleted from the sieve in some previous iteration. Hence the first term in the sieve in each iteration is a prime number. 
+
+### (b)
+
+If there is any composite number in the current sieve when the algorithm iterates to where
+
+$$p \ge \sqrt{n}$$
+,then that composite number must have at least one factor, other than itself, that is less than or equals to $\sqrt{n}$. But that composite should have been deleted from the sieve by the algorithm in some previous iterations.
+
+### (c)
+```{r}
+# Standard Sieve of Eratosthenes
+Eratosthenes <- function(n){  
+  if(n >=2){
+    sieve <- seq(2,n)
+    primes <- c()
+    while(length(sieve) > 0){
+      p <- sieve[1]
+      primes <- c(primes, p)
+      sieve <- sieve[(sieve %% p) != 0] 
+    }
+    return(primes)
+  } else {
+      stop("Input value of n should be at least 2.")
+    }
+}
+
+# Fast Sieve of Eratosthenes
+Eratosthenes_fast <- function(n){
+  if(n >=2){
+    sieve <- seq(2,n)
+    primes <- c()
+    while(TRUE){
+      p <- sieve[1]
+      if(p >= sqrt(n)) { # Stopping criterion
+        primes <- c(primes, sieve) # append the entire sieve to primes
+        break
+        }
+      primes <- c(primes, p)
+      sieve <- sieve[(sieve %% p) != 0]
+    }
+    return(primes)
+  } else {
+      stop("Input value of n should be at least 2.")
+    }
+}
+
+# Test whether 2 approaches find different prime numbers (= 0 if they find exactly the same.)
+sum( Eratosthenes(123456) != Eratosthenes_fast(123456) )
+```
+
+# Section 4.2.1
+
+## Exercise 2
+
+### (a)
+```{r}
+compound.interest <- function(P, i.r, n){
+  return( P * (1 + i.r)^n )
+}
+```
+
+### (b)
+```{r}
+paste("Mr. Ng will have $", compound.interest(1000, 0.01, 30), "in his bank account", sep = ' ')
+```
+
+
+## Exercise 3: Bisection method to find roots
+```{r}
+# Bisection function
+# f is the input function 
+# Min is the lower of the interval of f's support to be searched for the root
+# Max is the upper of the interval of f's support to be searched for the root
+# if f(Max) - f(Min) < eps, then break
+
+bisection <- function(f, Min, Max, eps){ 
+  if( sign(f(Min)) == 0  ){    # input Min is accidentally the root
+    root <- Min
+  } else if(sign(f(Max))== 0) { # input Max is accidentally the root
+    root <- Max
+  } else if( sign(f(Min)) != sign(f(Max)) ){ # signs of function values for (Min, Max) are the opposite
+    
+    while(TRUE){
+      M <- (Min + Max) / 2  # the current midpoint
+      if( abs(f(Min) - f(Max)) < eps){ # stopping criterion
+        root <- M
+        break
+      }
+      if( sign(f(M)) != sign(f(Max))) { 
+        Min <- M   # update the lower of the interval 
+      } else {
+        Max <- M   # update the upper of the interval 
+      }
+    }
+    
+  } else {
+    stop("Input end points should have different sign in function values.")
+  }
+  return(root)
+}
+
+# Test the function
+poly <- function(x){ # The only real root is −1.97739
+  y <- 7* x^3 + 8* x^2 - 7*x + 9
+}
+bisection(poly, -5, 2, 10^-8)
+```
+
+# Section 4.4.1
+
+## Exercise 1
+```{r}
+# 10!
+print(factorial(10))
+# 50!
+print(factorial(50))
+# 100!
+print(factorial(100))
+# 1000!
+X <- 1
+for(i in 1:1000){
+  X <- X * i
+}
+print(X)
+```
+
+## Exercise 2
+
+### (a)
+Using fix function to modified factorial function as the following:
+$$\fbox{function (x,y) 
+ gamma(x + 1) / gamma(y + 1) /gamma(x - y + 1)}$$ 
+ 
+```{r eval=FALSE}
+fix(factorial)
+```
+
+### (b)
+```{r eval=FALSE}
+# (4,2)
+factorial(4,2)
+# (50,20)
+factorial(50,20)
+# (5000,2000)
+factorial(5000,2000)
+```
+[1] 6
+[1] 4.712921e+13
+value out of range in 'gammafn'value out of range in 'gammafn'value out of range in 'gammafn'[1] NaN
+
+### (c)
+```{r}
+choose_logexp <- function(n, m){
+  y <- c()
+  for(i in 1:m){
+    y[i] <- log( (n - i + 1) / i )
+  }
+  x <- exp(sum(y))
+  return(x)
+}
+```
+
+### (d)
+```{r}
+# (4,2)
+choose_logexp(4,2)
+# (50,20)
+choose_logexp(50,20)
+# (5000,2000)
+choose_logexp(5000,2000)
+```
+
+# Chapter 4 exercises 1,2,3
+
+## Exercise 1: RANDU algorithm
+```{r}
+n <- 3000000
+results <- numeric(n)
+x <- 123
+for (i in 1:n) {
+  x <- (65539*x) %% (2^31)
+  results[i] <- x / (2^31)
+}
+
+round_res <- round(results, 3)
+M <- matrix(round_res, nrow = 1000000, ncol = 3, byrow = TRUE)
+x <- seq(0.1, 0.9, by = 0.1)
+```
+
+```{r}
+par(mfrow=c(3,3))
+for(k in seq_along(x)){
+  indicate <- c()
+  for(j in 1:1000000){
+     indicate[j] <- ifelse(M[j, 1] == x[k], TRUE, FALSE)
+  }
+  if( sum(indicate) == 0) next  # if no row matches x in the first column, then skip the outer loop (i.e. the plot is empty, so I skip it.)
+  plot(M[indicate, 2] ~ M[indicate, 3], pch = 20, xlab = '3rd column',ylab = '2nd column')
+}
+
+```
+
+## Exercise 2: Directly calculating polynomials
+```{r}
+directpoly <- function(x, coeff){
+  n <- length(coeff)
+  x_power <- x^seq(0,n-1)
+  P <- sum(coeff * x_power)
+  return(P)
+  }
+
+# Test the function 
+directpoly(0,c(1,2,3,4,5,6))
+directpoly(1,c(1,2,3,4,5,6))
+directpoly(2,c(1,2,3,4,5,6))
+```
+
+## Exercise 3: Horner's rule
+```{r}
+hornerpoly <- function(x, coeff){
+  n <- length(coeff)
+  P <- c()
+  for(j in seq_along(x)){
+    a <- coeff[n]
+    for(i in (n-1):1){ a <- a * x[j] + coeff[i]}
+    P[j] <- a}
+  return(P)
+  }
+
+# Test the function x = (0,1,2), coefficients is (1,2,3,4,5,6)
+hornerpoly(c(0,1,2), c(1,2,3,4,5,6))
+```
